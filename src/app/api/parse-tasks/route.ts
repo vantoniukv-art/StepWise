@@ -135,6 +135,13 @@ export async function POST(request: Request) {
     }
     if (error instanceof Anthropic.APIError) {
       logAnthropicError("APIError calling Anthropic API", error);
+      if (/credit balance/i.test(error.message)) {
+        return errorResponse(
+          "На акаунті Anthropic закінчились кредити. Поповни баланс у Plans & Billing на console.anthropic.com.",
+          "auth_error",
+          500
+        );
+      }
       return errorResponse("AI-сервіс тимчасово недоступний. Спробуй ще раз.", "invalid_response", 502);
     }
     logAnthropicError("Unexpected error calling Anthropic API", error);
