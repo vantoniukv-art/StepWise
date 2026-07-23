@@ -7,6 +7,8 @@ import { generateId } from "@/lib/id";
 
 export const runtime = "nodejs";
 
+type ErrorCode = "auth_error" | "rate_limit" | "invalid_response" | "network";
+
 const ParsedTaskSchema = z.object({
   title: z.string(),
   category: z.enum(CATEGORIES as [string, ...string[]]),
@@ -35,25 +37,41 @@ function buildSystemPrompt(): string {
 Не вигадуй задачі, яких немає в тексті. Якщо одна думка описує кілька дій — розбий на кілька задач. Якщо думка сформульована розмито — перетвори її на конкретний перший крок, а не пропускай.`;
 }
 
+function logAnthropicError(context: string, error: unknown) {
+  if (error instanceof Anthropic.APIError) {
+    console.error(`[parse-tasks] ${context}`, {
+      status: error.status,
+      type: error.type,
+      name: error.name,
+      message: error.message,
+    });
+    return;
+  }
+  console.error(`[parse-tasks] ${context}`, error);
+}
+
+function errorResponse(userMessage: string, code: ErrorCode, status: number) {
+  return NextResponse.json({ error: userMessage, code }, { status });
+}
+
 export async function POST(request: Request) {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
-    return NextResponse.json(
-      { error: "Сервер не налаштований: відсутній ANTHROPIC_API_KEY." },
-      { status: 500 }
-    );
+    console.error("[parse-tasks] Missing ANTHROPIC_API_KEY env var on the server.");
+    return errorResponse("Сервер не налаштований: відсутній ANTHROPIC_API_KEY.", "auth_error", 500);
   }
 
   let text: string;
   try {
     const body = await request.json();
     text = typeof body?.text === "string" ? body.text.trim() : "";
-  } catch {
-    return NextResponse.json({ error: "Некоректний запит." }, { status: 400 });
+  } catch (error) {
+    console.error("[parse-tasks] Failed to parse request body", error);
+    return errorResponse("Некоректний запит.", "invalid_response", 400);
   }
 
   if (!text) {
-    return NextResponse.json({ error: "Порожній текст — нічого розбирати." }, { status: 400 });
+    return errorResponse("Порожній текст — нічого розбирати.", "invalid_response", 400);
   }
 
   const client = new Anthropic({ apiKey });
@@ -70,17 +88,23 @@ export async function POST(request: Request) {
     });
 
     if (response.stop_reason === "refusal") {
-      return NextResponse.json(
-        { error: "AI відмовився розбирати цей текст. Спробуй переформулювати." },
-        { status: 422 }
+      console.error("[parse-tasks] Claude refused the request", {
+        stop_reason: response.stop_reason,
+        stop_details: response.stop_details,
+      });
+      return errorResponse(
+        "AI відмовився розбирати цей текст. Спробуй переформулювати.",
+        "invalid_response",
+        422
       );
     }
 
     if (!response.parsed_output) {
-      return NextResponse.json(
-        { error: "Не вдалося розібрати відповідь AI. Спробуй ще раз." },
-        { status: 502 }
-      );
+      console.error("[parse-tasks] No parsed_output in response", {
+        stop_reason: response.stop_reason,
+        content: response.content,
+      });
+      return errorResponse("Не вдалося розібрати відповідь AI. Спробуй ще раз.", "invalid_response", 502);
     }
 
     const now = new Date().toISOString();
@@ -98,23 +122,22 @@ export async function POST(request: Request) {
     return NextResponse.json({ tasks });
   } catch (error) {
     if (error instanceof Anthropic.AuthenticationError) {
-      return NextResponse.json(
-        { error: "Проблема з авторизацією AI-сервісу. Перевір ключ на сервері." },
-        { status: 500 }
-      );
+      logAnthropicError("AuthenticationError calling Anthropic API", error);
+      return errorResponse("Проблема з авторизацією AI-сервісу. Перевір ключ на сервері.", "auth_error", 500);
     }
     if (error instanceof Anthropic.RateLimitError) {
-      return NextResponse.json(
-        { error: "Забагато запитів. Зачекай трохи і спробуй ще раз." },
-        { status: 429 }
-      );
+      logAnthropicError("RateLimitError calling Anthropic API", error);
+      return errorResponse("Забагато запитів. Зачекай трохи і спробуй ще раз.", "rate_limit", 429);
+    }
+    if (error instanceof Anthropic.APIConnectionError) {
+      logAnthropicError("APIConnectionError calling Anthropic API", error);
+      return errorResponse("Не вдалося з'єднатися з AI-сервісом. Спробуй ще раз.", "network", 502);
     }
     if (error instanceof Anthropic.APIError) {
-      return NextResponse.json(
-        { error: "AI-сервіс тимчасово недоступний. Спробуй ще раз." },
-        { status: 502 }
-      );
+      logAnthropicError("APIError calling Anthropic API", error);
+      return errorResponse("AI-сервіс тимчасово недоступний. Спробуй ще раз.", "invalid_response", 502);
     }
-    return NextResponse.json({ error: "Щось пішло не так. Спробуй ще раз." }, { status: 500 });
+    logAnthropicError("Unexpected error calling Anthropic API", error);
+    return errorResponse("Щось пішло не так. Спробуй ще раз.", "invalid_response", 500);
   }
 }

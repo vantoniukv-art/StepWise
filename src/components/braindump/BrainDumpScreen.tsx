@@ -15,6 +15,7 @@ const ERROR_EMPTY = "Спершу напиши хоч щось, навіть д�
 const ERROR_PARSE_FAILED = "Щось пішло не так із розбором. Спробуй ще раз, твій текст я зберегла";
 const ERROR_NO_CONNECTION = "Не бачу зв'язку. Перевір інтернет і спробуй ще раз";
 const ERROR_NO_TASKS_FOUND = "Не знайшла в цьому конкретних задач — спробуй додати більше деталей.";
+const ERROR_AUTH = "Проблема з ключем доступу";
 
 export function BrainDumpScreen({ onParsed }: BrainDumpScreenProps) {
   const [text, setText] = useState("");
@@ -50,7 +51,14 @@ export function BrainDumpScreen({ onParsed }: BrainDumpScreenProps) {
       });
 
       if (!res.ok) {
-        setError(ERROR_PARSE_FAILED);
+        let code: string | undefined;
+        try {
+          const errorBody = await res.json();
+          code = errorBody?.code;
+        } catch {
+          // response wasn't JSON — fall through with no code
+        }
+        setError(code === "auth_error" ? ERROR_AUTH : ERROR_PARSE_FAILED);
         setIsLoading(false);
         return;
       }
