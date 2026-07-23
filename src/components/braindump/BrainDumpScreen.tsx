@@ -11,6 +11,11 @@ interface BrainDumpScreenProps {
   onParsed: (tasks: Task[]) => void;
 }
 
+const ERROR_EMPTY = "Спершу напиши хоч щось, навіть два слова згодяться";
+const ERROR_PARSE_FAILED = "Щось пішло не так із розбором. Спробуй ще раз, твій текст я зберегла";
+const ERROR_NO_CONNECTION = "Не бачу зв'язку. Перевір інтернет і спробуй ще раз";
+const ERROR_NO_TASKS_FOUND = "Не знайшла в цьому конкретних задач — спробуй додати більше деталей.";
+
 export function BrainDumpScreen({ onParsed }: BrainDumpScreenProps) {
   const [text, setText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -27,7 +32,12 @@ export function BrainDumpScreen({ onParsed }: BrainDumpScreenProps) {
 
   async function handleSubmit() {
     const trimmed = text.trim();
-    if (!trimmed || isLoading) return;
+    if (isLoading) return;
+
+    if (!trimmed) {
+      setError(ERROR_EMPTY);
+      return;
+    }
 
     setIsLoading(true);
     setError(null);
@@ -38,17 +48,17 @@ export function BrainDumpScreen({ onParsed }: BrainDumpScreenProps) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text: trimmed }),
       });
-      const data = await res.json();
 
       if (!res.ok) {
-        setError(data?.error || "Щось пішло не так. Спробуй ще раз.");
+        setError(ERROR_PARSE_FAILED);
         setIsLoading(false);
         return;
       }
 
+      const data = await res.json();
       const tasks: Task[] = data.tasks ?? [];
       if (tasks.length === 0) {
-        setError("Не знайшла в цьому конкретних задач — спробуй додати більше деталей.");
+        setError(ERROR_NO_TASKS_FOUND);
         setIsLoading(false);
         return;
       }
@@ -61,29 +71,30 @@ export function BrainDumpScreen({ onParsed }: BrainDumpScreenProps) {
         onParsed(tasks);
       }, 700);
     } catch {
-      setError("Не вдалося зв'язатись із сервером. Перевір з'єднання і спробуй ще раз.");
+      setError(ERROR_NO_CONNECTION);
       setIsLoading(false);
     }
   }
 
   const glowState = isCelebrating ? "celebrating" : isLoading ? "thinking" : "idle";
+  const subtitle = isLoading
+    ? "Glow розбирає твої думки..."
+    : "Вивантаж усе підряд: задачі, ідеї, дедлайни. Glow розбере це на кроки.";
 
   return (
     <div className="flex flex-1 flex-col overflow-y-auto px-5 pb-6 pt-6">
       <header className="mb-5 flex items-start gap-3">
         <Glow state={glowState} size="lg" className="mt-0.5 flex-shrink-0" />
         <div className="min-w-0">
-          <h1 className="text-xl font-semibold leading-tight">Що в голові?</h1>
-          <p className="mt-1 text-sm leading-relaxed text-muted">
-            Вивантаж усе, що крутиться в голові — я розберу це на задачі.
-          </p>
+          <h1 className="text-xl font-semibold leading-tight">Що крутиться в голові?</h1>
+          <p className="mt-1 text-sm leading-relaxed text-muted">{subtitle}</p>
         </div>
       </header>
 
       <textarea
         value={text}
         onChange={(e) => setText(e.target.value)}
-        placeholder="Наприклад: треба оновити резюме до п'ятниці, написати трьом людям в лінкедін, підготуватись до співбесіди в четвер..."
+        placeholder="Наприклад: оновити резюме, написати Марині про менторство, пройти модуль з SQL до п'ятниці..."
         disabled={isLoading || isCelebrating}
         rows={8}
         className="flex-1 resize-none rounded-2xl border border-card-border bg-card p-4 text-sm leading-relaxed text-foreground placeholder:text-muted focus:border-accent/60 focus:outline-none disabled:opacity-60"
@@ -95,6 +106,8 @@ export function BrainDumpScreen({ onParsed }: BrainDumpScreenProps) {
             type="button"
             onClick={startVoice}
             disabled={voiceStatus === "listening" || voiceStatus === "processing" || isLoading}
+            aria-label="Надиктувати голосом"
+            title="Надиктувати голосом"
             className="flex items-center gap-2 rounded-full border border-card-border bg-card px-3 py-2 text-xs text-muted disabled:opacity-60"
           >
             {voiceStatus === "listening" || voiceStatus === "processing" ? (
@@ -108,7 +121,7 @@ export function BrainDumpScreen({ onParsed }: BrainDumpScreenProps) {
                 ? "Розпізнаю..."
                 : voiceStatus === "error"
                   ? "Не розчула, спробуй ще"
-                  : "Диктувати"}
+                  : "Надиктувати голосом"}
           </button>
         ) : (
           <span />
@@ -124,7 +137,7 @@ export function BrainDumpScreen({ onParsed }: BrainDumpScreenProps) {
 
       <Button
         onClick={handleSubmit}
-        disabled={!text.trim() || isLoading || isCelebrating}
+        disabled={isLoading || isCelebrating}
         className="mt-4 w-full text-base"
       >
         {isLoading ? (

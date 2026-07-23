@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { CategoryTag } from "@/components/ui/CategoryTag";
 import { PriorityBadge } from "@/components/ui/PriorityBadge";
 import { formatDeadline } from "@/lib/date";
+import { capitalizeFirst } from "@/lib/utils";
 import { CATEGORIES, PRIORITIES, type Task } from "@/types/task";
 
 interface InboxTaskCardProps {
@@ -52,7 +53,7 @@ export function InboxTaskCard({ task, onUpdate, onDelete, onMoveToToday }: Inbox
           >
             {CATEGORIES.map((c) => (
               <option key={c} value={c}>
-                {c}
+                {capitalizeFirst(c)}
               </option>
             ))}
           </select>
@@ -63,7 +64,7 @@ export function InboxTaskCard({ task, onUpdate, onDelete, onMoveToToday }: Inbox
           >
             {PRIORITIES.map((p) => (
               <option key={p} value={p}>
-                {p}
+                {capitalizeFirst(p)}
               </option>
             ))}
           </select>
@@ -119,26 +120,26 @@ export function InboxTaskCard({ task, onUpdate, onDelete, onMoveToToday }: Inbox
         )}
       </div>
 
-      <div className="mt-3.5 flex items-center gap-2">
-        <Button onClick={onMoveToToday} className="flex-1">
+      <div className="mt-3.5">
+        <Button onClick={onMoveToToday} className="w-full">
           На сьогодні
         </Button>
-        <button
-          type="button"
-          onClick={startEdit}
-          aria-label="Редагувати"
-          className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full border border-card-border text-muted hover:text-foreground"
-        >
-          <Pencil className="h-4 w-4" />
-        </button>
-        <button
-          type="button"
-          onClick={onDelete}
-          aria-label="Видалити"
-          className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full border border-card-border text-muted hover:text-priority-high"
-        >
-          <Trash2 className="h-4 w-4" />
-        </button>
+        <div className="mt-2 flex items-center gap-2">
+          <button
+            type="button"
+            onClick={startEdit}
+            className="flex flex-1 items-center justify-center gap-1.5 rounded-full border border-card-border py-2 text-xs font-medium text-muted hover:text-foreground"
+          >
+            <Pencil className="h-3.5 w-3.5" /> Редагувати
+          </button>
+          <button
+            type="button"
+            onClick={onDelete}
+            className="flex flex-1 items-center justify-center gap-1.5 rounded-full border border-card-border py-2 text-xs font-medium text-muted hover:text-priority-high"
+          >
+            <Trash2 className="h-3.5 w-3.5" /> Видалити
+          </button>
+        </div>
       </div>
     </div>
   );

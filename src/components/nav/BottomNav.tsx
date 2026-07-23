@@ -13,15 +13,15 @@ interface BottomNavProps {
 }
 
 export function BottomNav({ active, onChange, inboxCount, todayCount }: BottomNavProps) {
-  const tabs: { id: NavTab; label: string; icon: typeof PenLine; count?: number }[] = [
-    { id: "braindump", label: "Дамп", icon: PenLine },
-    { id: "inbox", label: "Inbox", icon: Inbox, count: inboxCount },
+  const tabs: { id: NavTab; label: string; icon: typeof PenLine; count?: number; small?: boolean }[] = [
+    { id: "braindump", label: "Розвантаж", icon: PenLine },
+    { id: "inbox", label: "Розбір", icon: Inbox, count: inboxCount },
     { id: "today", label: "Сьогодні", icon: ListChecks, count: todayCount },
-    { id: "locked", label: "Скоро", icon: Lock },
+    { id: "locked", label: "Скоро: Аналіз · Пасвеї · Роадмеп", icon: Lock, small: true },
   ];
 
   return (
-    <nav className="flex flex-shrink-0 items-center justify-around border-t border-card-border bg-background/95 px-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] pt-2 backdrop-blur-md">
+    <nav className="flex flex-shrink-0 items-start justify-around border-t border-card-border bg-background/95 px-1.5 pb-[calc(0.5rem+env(safe-area-inset-bottom))] pt-2 backdrop-blur-md">
       {tabs.map((tab) => {
         const isActive = tab.id === active;
         const Icon = tab.icon;
@@ -29,7 +29,7 @@ export function BottomNav({ active, onChange, inboxCount, todayCount }: BottomNa
           <button
             key={tab.id}
             onClick={() => onChange(tab.id)}
-            className="relative flex flex-col items-center gap-1 rounded-2xl px-4 py-1.5"
+            className="relative flex w-16 flex-shrink-0 flex-col items-center gap-1 rounded-2xl px-1 py-1.5"
           >
             <span className="relative">
               <Icon className={cn("h-5 w-5", isActive ? "text-accent" : "text-muted")} strokeWidth={isActive ? 2.4 : 2} />
@@ -39,7 +39,13 @@ export function BottomNav({ active, onChange, inboxCount, todayCount }: BottomNa
                 </span>
               )}
             </span>
-            <span className={cn("text-[11px] font-medium", isActive ? "text-accent" : "text-muted")}>
+            <span
+              className={cn(
+                "text-center font-medium leading-tight",
+                tab.small ? "text-[8px]" : "text-[11px]",
+                isActive ? "text-accent" : "text-muted"
+              )}
+            >
               {tab.label}
             </span>
           </button>
