@@ -42,7 +42,7 @@ export function TodayScreen({ onGoToInbox }: { onGoToInbox: () => void }) {
   return (
     <div className="flex-1 overflow-y-auto px-5 pb-8 pt-6">
       <header className="mb-5 flex items-start gap-3">
-        <Glow state={isCelebrating ? "celebrating" : "idle"} size="lg" className="mt-0.5 flex-shrink-0" />
+        <Glow state={isCelebrating ? "celebrating" : "neutral"} size="lg" className="mt-0.5 flex-shrink-0" />
         <div className="min-w-0">
           <h1 className="text-xl font-semibold">Місія на сьогодні</h1>
           {todayTasks.length > 0 && <p className="mt-1 text-sm text-muted">{subtitle}</p>}

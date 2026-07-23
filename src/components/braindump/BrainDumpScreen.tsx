@@ -84,7 +84,7 @@ export function BrainDumpScreen({ onParsed }: BrainDumpScreenProps) {
     }
   }
 
-  const glowState = isCelebrating ? "celebrating" : isLoading ? "thinking" : "idle";
+  const glowState = isCelebrating ? "celebrating" : isLoading ? "thinking" : "neutral";
   const subtitle = isLoading
     ? "Glow розбирає твої думки..."
     : "Вивантаж усе підряд: задачі, ідеї, дедлайни. Glow розбере це на кроки.";
