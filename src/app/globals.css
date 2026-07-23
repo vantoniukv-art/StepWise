@@ -1,26 +1,77 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #1a1a2e;
+  --foreground: #f2f1f8;
+  --card: #232338;
+  --card-border: #33334d;
+  --muted: #9391ad;
+  --accent: #f4c542;
+  --accent-foreground: #241d05;
+
+  --category-navchannia: #6ea8fe;
+  --category-networking: #b794f6;
+  --category-portfolio: #4fd1a5;
+  --category-poshuk: #f472b6;
+  --category-inshe: #9391ad;
+
+  --priority-high: #f2545b;
+  --priority-medium: #f4c542;
+  --priority-low: #4fd1a5;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-border: var(--card-border);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+
+  --color-category-navchannia: var(--category-navchannia);
+  --color-category-networking: var(--category-networking);
+  --color-category-portfolio: var(--category-portfolio);
+  --color-category-poshuk: var(--category-poshuk);
+  --color-category-inshe: var(--category-inshe);
+
+  --color-priority-high: var(--priority-high);
+  --color-priority-medium: var(--priority-medium);
+  --color-priority-low: var(--priority-low);
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+body {
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@keyframes glow-pulse {
+  0%, 100% { transform: scale(1); opacity: 0.9; }
+  50% { transform: scale(1.08); opacity: 1; }
+}
+
+@keyframes glow-celebrate {
+  0% { transform: scale(1) rotate(0deg); }
+  30% { transform: scale(1.35) rotate(-8deg); }
+  60% { transform: scale(0.95) rotate(6deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+
+@keyframes particle-burst {
+  0% { transform: translate(0, 0) scale(1); opacity: 1; }
+  100% { transform: translate(var(--tx), var(--ty)) scale(0.3); opacity: 0; }
+}
+
+.animate-glow-pulse {
+  animation: glow-pulse 2.4s ease-in-out infinite;
+}
+
+.animate-glow-celebrate {
+  animation: glow-celebrate 0.6s ease-out;
+}
+
+.animate-particle-burst {
+  animation: particle-burst 0.7s ease-out forwards;
 }
