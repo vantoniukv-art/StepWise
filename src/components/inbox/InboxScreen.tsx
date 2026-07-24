@@ -3,15 +3,40 @@
 import { Glow } from "@/components/mascot/Glow";
 import { Button } from "@/components/ui/Button";
 import { InboxTaskCard } from "@/components/inbox/InboxTaskCard";
-import { buildExampleTasks } from "@/lib/exampleTasks";
 import { useTasks } from "@/store/TasksProvider";
 import type { Task } from "@/types/task";
 
 export function InboxScreen({ onGoToBrainDump }: { onGoToBrainDump: () => void }) {
-  const { tasks, addTasks, updateTask, deleteTask, moveToToday } = useTasks();
+  const { tasks, updateTask, deleteTask, moveToToday } = useTasks();
   const inboxTasks = tasks.filter((t) => t.status === "inbox");
-  const inboxIds = new Set(inboxTasks.map((t) => t.id));
-  const topLevelTasks = inboxTasks.filter((t) => !t.parent_id || !inboxIds.has(t.parent_id));
+
+  const topLevel = inboxTasks.filter((t) => !t.parent_id);
+  const topLevelIds = new Set(topLevel.map((t) => t.id));
+
+  // Steps still in Inbox, grouped by their parent's id.
+  const childrenByParent = new Map<string, Task[]>();
+  for (const t of inboxTasks) {
+    if (!t.parent_id) continue;
+    const list = childrenByParent.get(t.parent_id) ?? [];
+    list.push(t);
+    childrenByParent.set(t.parent_id, list);
+  }
+
+  // A parent can live outside Inbox (e.g. it was decomposed after already
+  // being taken to Today) while its steps still land in Inbox — pull those
+  // parents in from the full task list so the steps stay visually grouped.
+  const externalParents = [...childrenByParent.keys()]
+    .filter((id) => !topLevelIds.has(id))
+    .map((id) => tasks.find((t) => t.id === id))
+    .filter((t): t is Task => Boolean(t));
+
+  const groups = [...topLevel, ...externalParents];
+
+  // Steps whose parent was deleted entirely — nothing to nest them under.
+  const knownParentIds = new Set(groups.map((g) => g.id));
+  const danglingSteps = inboxTasks.filter((t) => t.parent_id && !knownParentIds.has(t.parent_id));
+
+  const isEmpty = groups.length === 0 && danglingSteps.length === 0;
 
   function childCountOf(taskId: string) {
     return tasks.filter((t) => t.parent_id === taskId).length;
@@ -34,30 +59,25 @@ export function InboxScreen({ onGoToBrainDump }: { onGoToBrainDump: () => void }
     <div className="flex-1 overflow-y-auto px-5 pb-8 pt-6">
       <header className="mb-5">
         <h1 className="text-xl font-semibold">Ось що вийшло</h1>
-        {inboxTasks.length > 0 && (
+        {!isEmpty && (
           <p className="mt-1 text-sm text-muted">Ось твої наступні кроки. Обери, з чого почнеш сьогодні</p>
         )}
       </header>
 
-      {topLevelTasks.length === 0 ? (
+      {isEmpty ? (
         <div className="flex flex-col items-center gap-4 rounded-3xl border border-card-border bg-card/50 px-6 py-12 text-center">
           <Glow size="lg" />
           <p className="text-sm leading-relaxed text-muted">
             Поки що тут порожньо. Напиши свої думки, і Glow перетворить їх на задачі
           </p>
-          <div className="flex w-full flex-col gap-2">
-            <Button onClick={onGoToBrainDump} className="w-full">
-              До Думок
-            </Button>
-            <Button variant="secondary" onClick={() => addTasks(buildExampleTasks())} className="w-full">
-              Показати приклад
-            </Button>
-          </div>
+          <Button onClick={onGoToBrainDump} className="w-full">
+            До Думок
+          </Button>
         </div>
       ) : (
         <div className="space-y-4">
-          {topLevelTasks.map((task) => {
-            const children = inboxTasks.filter((t) => t.parent_id === task.id);
+          {groups.map((task) => {
+            const children = childrenByParent.get(task.id) ?? [];
             return (
               <div key={task.id}>
                 {renderCard(task)}
@@ -69,6 +89,7 @@ export function InboxScreen({ onGoToBrainDump }: { onGoToBrainDump: () => void }
               </div>
             );
           })}
+          {danglingSteps.map((task) => renderCard(task))}
         </div>
       )}
     </div>
