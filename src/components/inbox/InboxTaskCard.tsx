@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { CategoryTag } from "@/components/ui/CategoryTag";
 import { PriorityBadge } from "@/components/ui/PriorityBadge";
 import { formatDeadline } from "@/lib/date";
-import { capitalizeFirst } from "@/lib/utils";
+import { CATEGORY_LABELS, PRIORITY_LABELS } from "@/lib/labels";
 import { CATEGORIES, PRIORITIES, type Task } from "@/types/task";
 
 interface InboxTaskCardProps {
@@ -53,7 +53,7 @@ export function InboxTaskCard({ task, onUpdate, onDelete, onMoveToToday }: Inbox
           >
             {CATEGORIES.map((c) => (
               <option key={c} value={c}>
-                {capitalizeFirst(c)}
+                {CATEGORY_LABELS[c]}
               </option>
             ))}
           </select>
@@ -64,7 +64,7 @@ export function InboxTaskCard({ task, onUpdate, onDelete, onMoveToToday }: Inbox
           >
             {PRIORITIES.map((p) => (
               <option key={p} value={p}>
-                {capitalizeFirst(p)}
+                {PRIORITY_LABELS[p]}
               </option>
             ))}
           </select>
@@ -122,7 +122,7 @@ export function InboxTaskCard({ task, onUpdate, onDelete, onMoveToToday }: Inbox
 
       <div className="mt-3.5">
         <Button onClick={onMoveToToday} className="w-full">
-          На сьогодні
+          Беру на сьогодні
         </Button>
         <div className="mt-2 flex items-center gap-2">
           <button
@@ -130,14 +130,14 @@ export function InboxTaskCard({ task, onUpdate, onDelete, onMoveToToday }: Inbox
             onClick={startEdit}
             className="flex flex-1 items-center justify-center gap-1.5 rounded-full border border-card-border py-2 text-xs font-medium text-muted hover:text-foreground"
           >
-            <Pencil className="h-3.5 w-3.5" /> Редагувати
+            <Pencil className="h-3.5 w-3.5" /> Змінити
           </button>
           <button
             type="button"
             onClick={onDelete}
             className="flex flex-1 items-center justify-center gap-1.5 rounded-full border border-card-border py-2 text-xs font-medium text-muted hover:text-priority-high"
           >
-            <Trash2 className="h-3.5 w-3.5" /> Видалити
+            <Trash2 className="h-3.5 w-3.5" /> Прибрати
           </button>
         </div>
       </div>

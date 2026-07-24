@@ -5,9 +5,10 @@ import { Glow } from "@/components/mascot/Glow";
 import { Button } from "@/components/ui/Button";
 import { TodayTaskItem } from "@/components/today/TodayTaskItem";
 import { pickRandom } from "@/lib/random";
+import { pluralizeUk } from "@/lib/pluralize";
 import { useTasks } from "@/store/TasksProvider";
 
-const COMPLETION_PHRASES = ["Є! Один крок ближче", "Красиво зроблено", "Так тримати"];
+const COMPLETION_PHRASES = ["Є! Крок зроблено", "Клас, рухаємось далі", "Оце темп!"];
 
 export function TodayScreen({ onGoToInbox }: { onGoToInbox: () => void }) {
   const { tasks, completeTask } = useTasks();
@@ -33,18 +34,19 @@ export function TodayScreen({ onGoToInbox }: { onGoToInbox: () => void }) {
     setTimeout(() => setIsCelebrating(false), 900);
   }
 
+  const remainingWord = pluralizeUk(remainingCount, "задача", "задачі", "задач");
   const subtitle = allDone
-    ? "Місію на сьогодні виконано. Пишаюсь тобою!"
+    ? "Все зроблено! Сьогодні ти молодець"
     : flashMessage
       ? flashMessage
-      : `${remainingCount} задач у фокусі`;
+      : `${remainingCount} ${remainingWord} у фокусі`;
 
   return (
     <div className="flex-1 overflow-y-auto px-5 pb-8 pt-6">
       <header className="mb-5 flex items-start gap-3">
         <Glow state={isCelebrating ? "celebrating" : "neutral"} size="lg" className="mt-0.5 flex-shrink-0" />
         <div className="min-w-0">
-          <h1 className="text-xl font-semibold">Місія на сьогодні</h1>
+          <h1 className="text-xl font-semibold">Твій план на сьогодні</h1>
           {todayTasks.length > 0 && <p className="mt-1 text-sm text-muted">{subtitle}</p>}
         </div>
       </header>
@@ -52,9 +54,9 @@ export function TodayScreen({ onGoToInbox }: { onGoToInbox: () => void }) {
       {todayTasks.length === 0 ? (
         <div className="flex flex-col items-center gap-4 rounded-3xl border border-card-border bg-card/50 px-6 py-12 text-center">
           <p className="text-sm leading-relaxed text-muted">
-            На сьогодні поки нічого нема. Обери задачі в Розборі, і почнемо
+            На сьогодні ще нічого не обрано. Зазирни в Задачі та обери, з чого почнеш
           </p>
-          <Button onClick={onGoToInbox}>До Розбору</Button>
+          <Button onClick={onGoToInbox}>До задач</Button>
         </div>
       ) : (
         <div className="space-y-3">

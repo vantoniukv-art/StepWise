@@ -12,12 +12,14 @@ interface BottomNavProps {
   todayCount: number;
 }
 
+const LOCKED_HINT = "Аналіз, пасвеї та роадмеп уже в розробці";
+
 export function BottomNav({ active, onChange, inboxCount, todayCount }: BottomNavProps) {
-  const tabs: { id: NavTab; label: string; icon: typeof PenLine; count?: number; small?: boolean }[] = [
-    { id: "braindump", label: "Розвантаж", icon: PenLine },
-    { id: "inbox", label: "Розбір", icon: Inbox, count: inboxCount },
+  const tabs: { id: NavTab; label: string; icon: typeof PenLine; count?: number; title?: string }[] = [
+    { id: "braindump", label: "Думки", icon: PenLine },
+    { id: "inbox", label: "Задачі", icon: Inbox, count: inboxCount },
     { id: "today", label: "Сьогодні", icon: ListChecks, count: todayCount },
-    { id: "locked", label: "Скоро: Аналіз · Пасвеї · Роадмеп", icon: Lock, small: true },
+    { id: "locked", label: "Скоро", icon: Lock, title: LOCKED_HINT },
   ];
 
   return (
@@ -29,6 +31,8 @@ export function BottomNav({ active, onChange, inboxCount, todayCount }: BottomNa
           <button
             key={tab.id}
             onClick={() => onChange(tab.id)}
+            title={tab.title}
+            aria-label={tab.title ? `${tab.label}: ${tab.title}` : undefined}
             className="relative flex w-16 flex-shrink-0 flex-col items-center gap-1 rounded-2xl px-1 py-1.5"
           >
             <span className="relative">
@@ -40,11 +44,7 @@ export function BottomNav({ active, onChange, inboxCount, todayCount }: BottomNa
               )}
             </span>
             <span
-              className={cn(
-                "text-center font-medium leading-tight",
-                tab.small ? "text-[8px]" : "text-[11px]",
-                isActive ? "text-accent" : "text-muted"
-              )}
+              className={cn("text-center text-[11px] font-medium leading-tight", isActive ? "text-accent" : "text-muted")}
             >
               {tab.label}
             </span>

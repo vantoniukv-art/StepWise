@@ -1,5 +1,6 @@
 import type { Category } from "@/types/task";
-import { capitalizeFirst, cn } from "@/lib/utils";
+import { CATEGORY_LABELS } from "@/lib/labels";
+import { cn } from "@/lib/utils";
 
 const CATEGORY_STYLE: Record<Category, string> = {
   навчання: "bg-category-navchannia/15 text-category-navchannia",
@@ -18,7 +19,7 @@ export function CategoryTag({ category, className }: { category: Category; class
         className
       )}
     >
-      {capitalizeFirst(category)}
+      {CATEGORY_LABELS[category]}
     </span>
   );
 }

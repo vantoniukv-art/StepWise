@@ -3,19 +3,20 @@
 import { Glow } from "@/components/mascot/Glow";
 import { Button } from "@/components/ui/Button";
 import { InboxTaskCard } from "@/components/inbox/InboxTaskCard";
+import { buildExampleTasks } from "@/lib/exampleTasks";
 import { useTasks } from "@/store/TasksProvider";
 import type { Task } from "@/types/task";
 
 export function InboxScreen({ onGoToBrainDump }: { onGoToBrainDump: () => void }) {
-  const { tasks, updateTask, deleteTask, moveToToday } = useTasks();
+  const { tasks, addTasks, updateTask, deleteTask, moveToToday } = useTasks();
   const inboxTasks = tasks.filter((t) => t.status === "inbox");
 
   return (
     <div className="flex-1 overflow-y-auto px-5 pb-8 pt-6">
       <header className="mb-5">
-        <h1 className="text-xl font-semibold">Ось що я розібрала</h1>
+        <h1 className="text-xl font-semibold">Ось що вийшло</h1>
         {inboxTasks.length > 0 && (
-          <p className="mt-1 text-sm text-muted">Перевір, поправ, і додавай найважливіше на сьогодні</p>
+          <p className="mt-1 text-sm text-muted">Переглянь, підправ і обери, що береш на сьогодні</p>
         )}
       </header>
 
@@ -23,9 +24,16 @@ export function InboxScreen({ onGoToBrainDump }: { onGoToBrainDump: () => void }
         <div className="flex flex-col items-center gap-4 rounded-3xl border border-card-border bg-card/50 px-6 py-12 text-center">
           <Glow size="lg" />
           <p className="text-sm leading-relaxed text-muted">
-            Тут поки порожньо. Вивантаж думки на екрані Розвантаж, і задачі з&rsquo;являться тут
+            Поки що тут порожньо. Напиши свої думки, і Glow перетворить їх на задачі
           </p>
-          <Button onClick={onGoToBrainDump}>Вивантажити думки</Button>
+          <div className="flex w-full flex-col gap-2">
+            <Button onClick={onGoToBrainDump} className="w-full">
+              До Думок
+            </Button>
+            <Button variant="secondary" onClick={() => addTasks(buildExampleTasks())} className="w-full">
+              Показати приклад
+            </Button>
+          </div>
         </div>
       ) : (
         <div className="space-y-3">

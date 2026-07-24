@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "StepWise Planner",
-  description: "Вивантаж усе, що крутиться в голові — StepWise розбере це на задачі.",
+  description: "Виклади все як є. Glow розкладе це на зрозумілі кроки.",
 };
 
 export const viewport = {

@@ -11,11 +11,11 @@ interface BrainDumpScreenProps {
   onParsed: (tasks: Task[]) => void;
 }
 
-const ERROR_EMPTY = "Спершу напиши хоч щось, навіть два слова згодяться";
-const ERROR_PARSE_FAILED = "Щось пішло не так із розбором. Спробуй ще раз, твій текст я зберегла";
-const ERROR_NO_CONNECTION = "Не бачу зв'язку. Перевір інтернет і спробуй ще раз";
+const ERROR_EMPTY = "Напиши хоча б пару слів, і почнемо";
+const ERROR_PARSE_FAILED = "Ой, щось збилось. Спробуй ще раз, текст нікуди не зник";
+const ERROR_NO_CONNECTION = "Схоже, зник інтернет. Перевір з'єднання і спробуй ще раз";
 const ERROR_NO_TASKS_FOUND = "Не знайшла в цьому конкретних задач — спробуй додати більше деталей.";
-const ERROR_AUTH = "Проблема з ключем доступу";
+const ERROR_AUTH = "Тимчасова технічна пауза. Спробуй за хвилину";
 
 export function BrainDumpScreen({ onParsed }: BrainDumpScreenProps) {
   const [text, setText] = useState("");
@@ -86,8 +86,8 @@ export function BrainDumpScreen({ onParsed }: BrainDumpScreenProps) {
 
   const glowState = isCelebrating ? "celebrating" : isLoading ? "thinking" : "neutral";
   const subtitle = isLoading
-    ? "Glow розбирає твої думки..."
-    : "Вивантаж усе підряд: задачі, ідеї, дедлайни. Glow розбере це на кроки.";
+    ? "Glow читає твої думки..."
+    : "Виклади все як є. Glow розкладе це на зрозумілі кроки.";
 
   return (
     <div className="flex flex-1 flex-col overflow-y-auto px-5 pb-6 pt-6">
@@ -102,7 +102,7 @@ export function BrainDumpScreen({ onParsed }: BrainDumpScreenProps) {
       <textarea
         value={text}
         onChange={(e) => setText(e.target.value)}
-        placeholder="Наприклад: оновити резюме, написати Марині про менторство, пройти модуль з SQL до п'ятниці..."
+        placeholder="оновити резюме, написати Марині щодо менторства, до п'ятниці пройти модуль з SQL..."
         disabled={isLoading || isCelebrating}
         rows={8}
         className="flex-1 resize-none rounded-2xl border border-card-border bg-card p-4 text-sm leading-relaxed text-foreground placeholder:text-muted focus:border-accent/60 focus:outline-none disabled:opacity-60"
@@ -114,8 +114,8 @@ export function BrainDumpScreen({ onParsed }: BrainDumpScreenProps) {
             type="button"
             onClick={startVoice}
             disabled={voiceStatus === "listening" || voiceStatus === "processing" || isLoading}
-            aria-label="Надиктувати голосом"
-            title="Надиктувати голосом"
+            aria-label="Сказати голосом"
+            title="Сказати голосом"
             className="flex items-center gap-2 rounded-full border border-card-border bg-card px-3 py-2 text-xs text-muted disabled:opacity-60"
           >
             {voiceStatus === "listening" || voiceStatus === "processing" ? (
@@ -129,7 +129,7 @@ export function BrainDumpScreen({ onParsed }: BrainDumpScreenProps) {
                 ? "Розпізнаю..."
                 : voiceStatus === "error"
                   ? "Не розчула, спробуй ще"
-                  : "Надиктувати голосом"}
+                  : "Сказати голосом"}
           </button>
         ) : (
           <span />
@@ -154,7 +154,7 @@ export function BrainDumpScreen({ onParsed }: BrainDumpScreenProps) {
           </>
         ) : (
           <>
-            Розібрати задачі <ArrowUp className="h-4 w-4 rotate-45" />
+            Розкласти на задачі <ArrowUp className="h-4 w-4 rotate-45" />
           </>
         )}
       </Button>

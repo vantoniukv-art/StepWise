@@ -1,5 +1,6 @@
 import type { Priority } from "@/types/task";
-import { capitalizeFirst, cn } from "@/lib/utils";
+import { PRIORITY_LABELS } from "@/lib/labels";
+import { cn } from "@/lib/utils";
 
 const PRIORITY_DOT: Record<Priority, string> = {
   висока: "bg-priority-high",
@@ -11,7 +12,7 @@ export function PriorityBadge({ priority, className }: { priority: Priority; cla
   return (
     <span className={cn("inline-flex items-center gap-1.5 text-[11px] text-muted", className)}>
       <span className={cn("h-1.5 w-1.5 rounded-full", PRIORITY_DOT[priority])} />
-      {capitalizeFirst(priority)}
+      {PRIORITY_LABELS[priority]}
     </span>
   );
 }

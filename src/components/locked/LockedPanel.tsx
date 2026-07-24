@@ -14,7 +14,7 @@ export function LockedPanel() {
         <Glow size="lg" className="mb-3" />
         <h1 className="text-lg font-semibold">Скоро тут буде більше</h1>
         <p className="mt-1.5 text-sm leading-relaxed text-muted">
-          Це частини повного StepWise, над якими ми ще працюємо.
+          Аналіз, пасвеї та роадмеп уже в розробці
         </p>
       </header>
 
