@@ -18,12 +18,12 @@ interface ExampleTaskSeed {
 }
 
 const EXAMPLE_SEEDS: ExampleTaskSeed[] = [
-  { title: "Оновити розділ досвіду в резюме", category: "пошук", priority: "висока", estimate_min: 45, deadline: null },
-  { title: "Написати Марині щодо менторства", category: "нетворкінг", priority: "середня", estimate_min: 15, deadline: null },
+  { title: "Оновити розділ досвіду в резюме", category: "робота", priority: "висока", estimate_min: 45, deadline: null },
+  { title: "Записатись до стоматолога", category: "здоров'я", priority: "середня", estimate_min: 10, deadline: null },
   { title: "Пройти 3-й модуль курсу з SQL", category: "навчання", priority: "висока", estimate_min: 60, deadline: "__friday__" },
-  { title: "Зібрати два кейси для портфоліо", category: "портфоліо", priority: "середня", estimate_min: 90, deadline: null },
-  { title: "Відповісти рекрутеру з LinkedIn", category: "пошук", priority: "висока", estimate_min: 10, deadline: null },
-  { title: "Почитати про продуктові метрики", category: "навчання", priority: "низька", estimate_min: 30, deadline: null },
+  { title: "Купити подарунок мамі на день народження", category: "особисте", priority: "висока", estimate_min: 30, deadline: null },
+  { title: "Розібрати шафу і віддати зайве", category: "побут", priority: "низька", estimate_min: 90, deadline: null },
+  { title: "Відповісти рекрутеру з LinkedIn", category: "робота", priority: "висока", estimate_min: 10, deadline: null },
 ];
 
 export function buildExampleTasks(): Task[] {

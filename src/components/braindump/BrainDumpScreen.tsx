@@ -19,9 +19,9 @@ const ERROR_NO_TASKS_FOUND = "Не знайшла в цьому конкретн
 const ERROR_AUTH = "Тимчасова технічна пауза. Спробуй за хвилину";
 
 const INTRO_SUBTITLE =
-  "Привіт, я Glow. Коли в кар'єрі забагато 'треба' і незрозуміло, з чого почати - напиши все, що крутиться в голові. Далі моя робота.";
+  "Привіт, я Glow. Коли всього забагато - справи, плани, думки - просто напиши все як є. Я розкладу це на чіткі кроки.";
 const NORMAL_SUBTITLE =
-  "Розкажи, що зараз відбувається: плани, сумніви, хаос упереміш. Glow розкладе це на чіткі кроки.";
+  "Розкажи, що зараз відбувається. Glow перетворить хаос на план.";
 
 export function BrainDumpScreen({ onParsed }: BrainDumpScreenProps) {
   const [text, setText] = useState("");
@@ -109,7 +109,7 @@ export function BrainDumpScreen({ onParsed }: BrainDumpScreenProps) {
       <textarea
         value={text}
         onChange={(e) => setText(e.target.value)}
-        placeholder="хочу перейти в продакт-менеджмент, треба оновити резюме, не розумію, чи вчити SQL, до п'ятниці дедлайн по курсу..."
+        placeholder="оновити резюме, записатись до лікаря, купити подарунок мамі, до п'ятниці здати звіт..."
         disabled={isLoading || isCelebrating}
         rows={8}
         className="flex-1 resize-none rounded-2xl border border-card-border bg-card p-4 text-sm leading-relaxed text-foreground placeholder:text-muted focus:border-accent/60 focus:outline-none disabled:opacity-60"

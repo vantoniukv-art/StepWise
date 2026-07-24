@@ -9,10 +9,11 @@
   --accent: #f4c542;
   --accent-foreground: #241d05;
 
-  --category-navchannia: #6ea8fe;
-  --category-networking: #b794f6;
-  --category-portfolio: #4fd1a5;
-  --category-poshuk: #f472b6;
+  --category-robota: #6ea8fe;
+  --category-navchannia: #b794f6;
+  --category-osobyste: #4fd1a5;
+  --category-zdorovia: #f472b6;
+  --category-pobut: #f4a261;
   --category-inshe: #9391ad;
 
   --priority-high: #f2545b;
@@ -29,10 +30,11 @@
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
 
+  --color-category-robota: var(--category-robota);
   --color-category-navchannia: var(--category-navchannia);
-  --color-category-networking: var(--category-networking);
-  --color-category-portfolio: var(--category-portfolio);
-  --color-category-poshuk: var(--category-poshuk);
+  --color-category-osobyste: var(--category-osobyste);
+  --color-category-zdorovia: var(--category-zdorovia);
+  --color-category-pobut: var(--category-pobut);
   --color-category-inshe: var(--category-inshe);
 
   --color-priority-high: var(--priority-high);

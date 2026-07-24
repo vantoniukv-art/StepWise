@@ -3,10 +3,11 @@ import { CATEGORY_LABELS } from "@/lib/labels";
 import { cn } from "@/lib/utils";
 
 const CATEGORY_STYLE: Record<Category, string> = {
+  робота: "bg-category-robota/15 text-category-robota",
   навчання: "bg-category-navchannia/15 text-category-navchannia",
-  нетворкінг: "bg-category-networking/15 text-category-networking",
-  портфоліо: "bg-category-portfolio/15 text-category-portfolio",
-  пошук: "bg-category-poshuk/15 text-category-poshuk",
+  особисте: "bg-category-osobyste/15 text-category-osobyste",
+  "здоров'я": "bg-category-zdorovia/15 text-category-zdorovia",
+  побут: "bg-category-pobut/15 text-category-pobut",
   інше: "bg-category-inshe/15 text-category-inshe",
 };
 

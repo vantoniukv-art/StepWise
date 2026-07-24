@@ -1,4 +1,4 @@
-export type Category = "навчання" | "нетворкінг" | "портфоліо" | "пошук" | "інше";
+export type Category = "робота" | "навчання" | "особисте" | "здоров'я" | "побут" | "інше";
 export type Priority = "висока" | "середня" | "низька";
 export type TaskStatus = "inbox" | "today" | "done";
 
@@ -13,5 +13,5 @@ export interface Task {
   created_at: string;
 }
 
-export const CATEGORIES: Category[] = ["навчання", "нетворкінг", "портфоліо", "пошук", "інше"];
+export const CATEGORIES: Category[] = ["робота", "навчання", "особисте", "здоров'я", "побут", "інше"];
 export const PRIORITIES: Priority[] = ["висока", "середня", "низька"];

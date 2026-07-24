@@ -7,10 +7,11 @@ import type { Category, Priority } from "@/types/task";
  * AI contract never has to change just because the UI copy does.
  */
 export const CATEGORY_LABELS: Record<Category, string> = {
+  робота: "Робота",
   навчання: "Навчання",
-  нетворкінг: "Нетворкінг",
-  портфоліо: "Портфоліо",
-  пошук: "Пошук роботи",
+  особисте: "Особисте",
+  "здоров'я": "Здоров'я",
+  побут: "Побут",
   інше: "Різне",
 };
 
