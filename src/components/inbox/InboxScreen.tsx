@@ -16,7 +16,7 @@ export function InboxScreen({ onGoToBrainDump }: { onGoToBrainDump: () => void }
       <header className="mb-5">
         <h1 className="text-xl font-semibold">Ось що вийшло</h1>
         {inboxTasks.length > 0 && (
-          <p className="mt-1 text-sm text-muted">Переглянь, підправ і обери, що береш на сьогодні</p>
+          <p className="mt-1 text-sm text-muted">Ось твої наступні кроки. Обери, з чого почнеш сьогодні</p>
         )}
       </header>
 

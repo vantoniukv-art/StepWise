@@ -5,6 +5,7 @@ import { AlertCircle, ArrowUp, Loader2, Mic } from "lucide-react";
 import { Glow } from "@/components/mascot/Glow";
 import { Button } from "@/components/ui/Button";
 import { useVoiceInput } from "@/hooks/useVoiceInput";
+import { hasSeenIntro, markIntroSeen } from "@/lib/introSeen";
 import type { Task } from "@/types/task";
 
 interface BrainDumpScreenProps {
@@ -17,11 +18,15 @@ const ERROR_NO_CONNECTION = "Схоже, зник інтернет. Переві
 const ERROR_NO_TASKS_FOUND = "Не знайшла в цьому конкретних задач — спробуй додати більше деталей.";
 const ERROR_AUTH = "Тимчасова технічна пауза. Спробуй за хвилину";
 
+const INTRO_TEXT =
+  "Привіт, я Glow. Я допомагаю, коли в кар'єрі забагато 'треба' і незрозуміло, з чого почати. Просто напиши все, що крутиться в голові, далі - моя робота.";
+
 export function BrainDumpScreen({ onParsed }: BrainDumpScreenProps) {
   const [text, setText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isCelebrating, setIsCelebrating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showIntro, setShowIntro] = useState(() => !hasSeenIntro());
 
   const handleVoiceResult = useCallback((transcript: string) => {
     if (!transcript) return;
@@ -73,6 +78,8 @@ export function BrainDumpScreen({ onParsed }: BrainDumpScreenProps) {
 
       setIsLoading(false);
       setIsCelebrating(true);
+      markIntroSeen();
+      setShowIntro(false);
       setTimeout(() => {
         setIsCelebrating(false);
         setText("");
@@ -86,23 +93,30 @@ export function BrainDumpScreen({ onParsed }: BrainDumpScreenProps) {
 
   const glowState = isCelebrating ? "celebrating" : isLoading ? "thinking" : "neutral";
   const subtitle = isLoading
-    ? "Glow читає твої думки..."
-    : "Виклади все як є. Glow розкладе це на зрозумілі кроки.";
+    ? "Glow збирає з цього план..."
+    : "Розкажи, що зараз відбувається: плани, сумніви, хаос упереміш. Glow розкладе це на чіткі кроки і збере план на сьогодні.";
 
   return (
     <div className="flex flex-1 flex-col overflow-y-auto px-5 pb-6 pt-6">
       <header className="mb-5 flex items-start gap-3">
         <Glow state={glowState} size="lg" className="mt-0.5 flex-shrink-0" />
         <div className="min-w-0">
-          <h1 className="text-xl font-semibold leading-tight">Що крутиться в голові?</h1>
+          <h1 className="text-xl font-semibold leading-tight">Не знаєш, за що хапатись?</h1>
           <p className="mt-1 text-sm leading-relaxed text-muted">{subtitle}</p>
         </div>
       </header>
 
+      {showIntro && (
+        <div className="mb-4 flex items-start gap-3 rounded-2xl border border-card-border bg-card/70 p-4">
+          <Glow size="md" className="flex-shrink-0" />
+          <p className="text-sm leading-relaxed text-muted">{INTRO_TEXT}</p>
+        </div>
+      )}
+
       <textarea
         value={text}
         onChange={(e) => setText(e.target.value)}
-        placeholder="оновити резюме, написати Марині щодо менторства, до п'ятниці пройти модуль з SQL..."
+        placeholder="хочу перейти в продакт-менеджмент, треба оновити резюме, не розумію, чи вчити SQL, до п'ятниці дедлайн по курсу..."
         disabled={isLoading || isCelebrating}
         rows={8}
         className="flex-1 resize-none rounded-2xl border border-card-border bg-card p-4 text-sm leading-relaxed text-foreground placeholder:text-muted focus:border-accent/60 focus:outline-none disabled:opacity-60"
@@ -154,7 +168,7 @@ export function BrainDumpScreen({ onParsed }: BrainDumpScreenProps) {
           </>
         ) : (
           <>
-            Розкласти на задачі <ArrowUp className="h-4 w-4 rotate-45" />
+            Показати мені кроки <ArrowUp className="h-4 w-4 rotate-45" />
           </>
         )}
       </Button>

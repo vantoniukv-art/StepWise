@@ -54,7 +54,7 @@ export function TodayScreen({ onGoToInbox }: { onGoToInbox: () => void }) {
       {todayTasks.length === 0 ? (
         <div className="flex flex-col items-center gap-4 rounded-3xl border border-card-border bg-card/50 px-6 py-12 text-center">
           <p className="text-sm leading-relaxed text-muted">
-            На сьогодні ще нічого не обрано. Зазирни в Задачі та обери, з чого почнеш
+            План на сьогодні поки порожній. Зазирни в Задачі та обери перший крок
           </p>
           <Button onClick={onGoToInbox}>До задач</Button>
         </div>
