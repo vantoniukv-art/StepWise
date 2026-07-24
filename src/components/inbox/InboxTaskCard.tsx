@@ -2,23 +2,31 @@
 
 import { useState } from "react";
 import { Calendar, Clock, Pencil, Trash2, X } from "lucide-react";
+import { Glow } from "@/components/mascot/Glow";
 import { Button } from "@/components/ui/Button";
 import { CategoryTag } from "@/components/ui/CategoryTag";
 import { PriorityBadge } from "@/components/ui/PriorityBadge";
+import { Toast } from "@/components/ui/Toast";
+import { useDecomposeTask } from "@/hooks/useDecomposeTask";
 import { formatDeadline } from "@/lib/date";
 import { CATEGORY_LABELS, PRIORITY_LABELS } from "@/lib/labels";
+import { pluralizeUk } from "@/lib/pluralize";
 import { CATEGORIES, PRIORITIES, type Task } from "@/types/task";
 
 interface InboxTaskCardProps {
   task: Task;
+  childCount: number;
   onUpdate: (patch: Partial<Task>) => void;
   onDelete: () => void;
   onMoveToToday: () => void;
 }
 
-export function InboxTaskCard({ task, onUpdate, onDelete, onMoveToToday }: InboxTaskCardProps) {
+export function InboxTaskCard({ task, childCount, onUpdate, onDelete, onMoveToToday }: InboxTaskCardProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [draft, setDraft] = useState(task);
+  const { decompose, isDecomposing, toast } = useDecomposeTask();
+  const isDecomposed = childCount > 0;
+  const canDecompose = !task.parent_id && !isDecomposed;
 
   function startEdit() {
     setDraft(task);
@@ -120,8 +128,14 @@ export function InboxTaskCard({ task, onUpdate, onDelete, onMoveToToday }: Inbox
         )}
       </div>
 
+      {isDecomposed && (
+        <p className="mt-2 text-xs text-accent">
+          Розкладено на {childCount} {pluralizeUk(childCount, "крок", "кроки", "кроків")}
+        </p>
+      )}
+
       <div className="mt-3.5">
-        <Button onClick={onMoveToToday} className="w-full">
+        <Button onClick={onMoveToToday} disabled={isDecomposed} className="w-full">
           Беру на сьогодні
         </Button>
         <div className="mt-2 flex items-center gap-2">
@@ -140,7 +154,20 @@ export function InboxTaskCard({ task, onUpdate, onDelete, onMoveToToday }: Inbox
             <Trash2 className="h-3.5 w-3.5" /> Прибрати
           </button>
         </div>
+        {canDecompose && (
+          <button
+            type="button"
+            onClick={() => decompose(task)}
+            disabled={isDecomposing}
+            className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-full border border-card-border py-2 text-xs font-medium text-muted hover:text-foreground disabled:opacity-70"
+          >
+            <Glow state={isDecomposing ? "thinking" : "neutral"} size="xs" />
+            {isDecomposing ? "Glow думає..." : "Розкласти з Glow"}
+          </button>
+        )}
       </div>
+
+      <Toast message={toast} />
     </div>
   );
 }

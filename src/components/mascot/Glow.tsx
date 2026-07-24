@@ -6,11 +6,11 @@ export type GlowState = "neutral" | "thinking" | "celebrating";
 
 interface GlowProps {
   state?: GlowState;
-  size?: "sm" | "md" | "lg";
+  size?: "xs" | "sm" | "md" | "lg";
   className?: string;
 }
 
-const SIZE_PX = { sm: 32, md: 56, lg: 88 };
+const SIZE_PX = { xs: 18, sm: 32, md: 56, lg: 88 };
 
 const EYE_COLOR = "#332a4d";
 

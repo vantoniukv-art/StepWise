@@ -61,7 +61,12 @@ export function TodayScreen({ onGoToInbox }: { onGoToInbox: () => void }) {
       ) : (
         <div className="space-y-3">
           {todayTasks.map((task) => (
-            <TodayTaskItem key={task.id} task={task} onComplete={() => handleComplete(task.id)} />
+            <TodayTaskItem
+              key={task.id}
+              task={task}
+              childCount={tasks.filter((t) => t.parent_id === task.id).length}
+              onComplete={() => handleComplete(task.id)}
+            />
           ))}
         </div>
       )}

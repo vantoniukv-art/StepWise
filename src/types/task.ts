@@ -11,6 +11,7 @@ export interface Task {
   deadline: string | null;
   status: TaskStatus;
   created_at: string;
+  parent_id: string | null;
 }
 
 export const CATEGORIES: Category[] = ["робота", "навчання", "особисте", "здоров'я", "побут", "інше"];

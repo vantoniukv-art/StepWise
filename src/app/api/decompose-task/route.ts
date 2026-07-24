@@ -9,7 +9,7 @@ export const runtime = "nodejs";
 
 type ErrorCode = "auth_error" | "rate_limit" | "invalid_response" | "network";
 
-const ParsedTaskSchema = z.object({
+const StepSchema = z.object({
   title: z.string(),
   category: z.enum(CATEGORIES as [string, ...string[]]),
   priority: z.enum(PRIORITIES as [string, ...string[]]),
@@ -17,29 +17,29 @@ const ParsedTaskSchema = z.object({
   deadline: z.string().nullable(),
 });
 
-const ParsedResponseSchema = z.object({
-  tasks: z.array(ParsedTaskSchema),
+const DecomposeResponseSchema = z.object({
+  steps: z.array(StepSchema),
 });
 
 function buildSystemPrompt(): string {
   const today = new Date().toISOString().slice(0, 10);
-  return `Ти — AI-асистент продукту StepWise Planner. Користувач вивалює хаотичні думки про будь-який життєвий хаос — робочі задачі, навчання, особисті справи, здоров'я, побут (текстом або розпізнаним голосом). Розбий цей потік на окремі, конкретні, дієві задачі.
+  return `Ти — Glow, теплий кар'єрний провідник у продукті StepWise Planner. Користувач має велику розмиту задачу: {title}. Розклади її на 3-5 конкретних виконуваних кроків по 15-60 хв кожен. Кроки формулюй як дії від першої особи, українською, без канцеляриту. Якщо задача вже конкретна і мала - поверни один уточнений крок.
 
-Для кожної задачі визнач:
-- title: коротка, конкретна, дієслівна назва (наприклад «Оновити резюме», а не просто «резюме»).
-- category: одне з рівно цих значень — робота, навчання, особисте, здоров'я, побут, інше. Кар'єрні задачі (резюме, співбесіди, нетворкінг, пошук роботи) належать до категорії «робота». Якщо не впевнений, до якої категорії віднести — обери «інше».
-- priority: висока, середня або низька — оцінюй за терміновістю й важливістю, яку можна зрозуміти з тексту.
-- estimate_min: реалістична оцінка часу в хвилинах (ціле число, зазвичай 10-120).
-- deadline: якщо в тексті згадано конкретний або відносний дедлайн (наприклад «до п'ятниці», «через два тижні») — переведи його в дату у форматі YYYY-MM-DD, використовуючи сьогоднішню дату як точку відліку. Якщо дедлайну немає — null.
+Для кожного кроку визнач:
+- title: дія від першої особи, коротко й конкретно (наприклад «Напишу список компаній», а не «Складання переліку компаній»).
+- category: одне з рівно цих значень — ${CATEGORIES.join(", ")}.
+- priority: висока, середня або низька — оцінюй за терміновістю й важливістю, яку можна зрозуміти з контексту.
+- estimate_min: реалістична оцінка часу в хвилинах (ціле число, зазвичай 15-60).
+- deadline: якщо з контексту випливає конкретний або відносний дедлайн — переведи його в дату у форматі YYYY-MM-DD, використовуючи сьогоднішню дату як точку відліку. Якщо дедлайну немає — null.
 
 Сьогоднішня дата: ${today}.
 
-Не вигадуй задачі, яких немає в тексті. Якщо одна думка описує кілька дій — розбий на кілька задач. Якщо думка сформульована розмито — перетвори її на конкретний перший крок, а не пропускай.`;
+Не вигадуй деталей, яких немає в задачі.`;
 }
 
 function logAnthropicError(context: string, error: unknown) {
   if (error instanceof Anthropic.APIError) {
-    console.error(`[parse-tasks] ${context}`, {
+    console.error(`[decompose-task] ${context}`, {
       status: error.status,
       type: error.type,
       name: error.name,
@@ -47,7 +47,7 @@ function logAnthropicError(context: string, error: unknown) {
     });
     return;
   }
-  console.error(`[parse-tasks] ${context}`, error);
+  console.error(`[decompose-task] ${context}`, error);
 }
 
 function errorResponse(userMessage: string, code: ErrorCode, status: number) {
@@ -57,21 +57,23 @@ function errorResponse(userMessage: string, code: ErrorCode, status: number) {
 export async function POST(request: Request) {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
-    console.error("[parse-tasks] Missing ANTHROPIC_API_KEY env var on the server.");
+    console.error("[decompose-task] Missing ANTHROPIC_API_KEY env var on the server.");
     return errorResponse("Сервер не налаштований: відсутній ANTHROPIC_API_KEY.", "auth_error", 500);
   }
 
-  let text: string;
+  let parentId: string;
+  let title: string;
   try {
     const body = await request.json();
-    text = typeof body?.text === "string" ? body.text.trim() : "";
+    parentId = typeof body?.parentId === "string" ? body.parentId : "";
+    title = typeof body?.title === "string" ? body.title.trim() : "";
   } catch (error) {
-    console.error("[parse-tasks] Failed to parse request body", error);
+    console.error("[decompose-task] Failed to parse request body", error);
     return errorResponse("Некоректний запит.", "invalid_response", 400);
   }
 
-  if (!text) {
-    return errorResponse("Порожній текст — нічого розбирати.", "invalid_response", 400);
+  if (!parentId || !title) {
+    return errorResponse("Некоректний запит.", "invalid_response", 400);
   }
 
   const client = new Anthropic({ apiKey });
@@ -79,28 +81,28 @@ export async function POST(request: Request) {
   try {
     const response = await client.messages.parse({
       model: "claude-haiku-4-5",
-      max_tokens: 4096,
+      max_tokens: 2048,
       system: buildSystemPrompt(),
-      messages: [{ role: "user", content: text }],
+      messages: [{ role: "user", content: title }],
       output_config: {
-        format: zodOutputFormat(ParsedResponseSchema),
+        format: zodOutputFormat(DecomposeResponseSchema),
       },
     });
 
     if (response.stop_reason === "refusal") {
-      console.error("[parse-tasks] Claude refused the request", {
+      console.error("[decompose-task] Claude refused the request", {
         stop_reason: response.stop_reason,
         stop_details: response.stop_details,
       });
       return errorResponse(
-        "AI відмовився розбирати цей текст. Спробуй переформулювати.",
+        "AI відмовився розкладати цю задачу. Спробуй переформулювати.",
         "invalid_response",
         422
       );
     }
 
     if (!response.parsed_output) {
-      console.error("[parse-tasks] No parsed_output in response", {
+      console.error("[decompose-task] No parsed_output in response", {
         stop_reason: response.stop_reason,
         content: response.content,
       });
@@ -108,17 +110,21 @@ export async function POST(request: Request) {
     }
 
     const now = new Date().toISOString();
-    const tasks: Task[] = response.parsed_output.tasks.map((t) => ({
+    const tasks: Task[] = response.parsed_output.steps.map((s) => ({
       id: generateId("task"),
-      title: t.title,
-      category: t.category as Task["category"],
-      priority: t.priority as Task["priority"],
-      estimate_min: Math.max(5, Math.round(t.estimate_min)),
-      deadline: t.deadline,
+      title: s.title,
+      category: s.category as Task["category"],
+      priority: s.priority as Task["priority"],
+      estimate_min: Math.max(5, Math.round(s.estimate_min)),
+      deadline: s.deadline,
       status: "inbox",
       created_at: now,
-      parent_id: null,
+      parent_id: parentId,
     }));
+
+    if (tasks.length === 0) {
+      return errorResponse("Не вдалося розкласти цю задачу. Спробуй ще раз.", "invalid_response", 502);
+    }
 
     return NextResponse.json({ tasks });
   } catch (error) {

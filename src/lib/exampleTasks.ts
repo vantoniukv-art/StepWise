@@ -39,5 +39,6 @@ export function buildExampleTasks(): Task[] {
     deadline: seed.deadline === "__friday__" ? friday : seed.deadline,
     status: "inbox" as const,
     created_at: now,
+    parent_id: null,
   }));
 }

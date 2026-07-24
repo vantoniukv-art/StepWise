@@ -1,18 +1,26 @@
 "use client";
 
 import { Check } from "lucide-react";
+import { Glow } from "@/components/mascot/Glow";
 import { CategoryTag } from "@/components/ui/CategoryTag";
 import { PriorityBadge } from "@/components/ui/PriorityBadge";
+import { Toast } from "@/components/ui/Toast";
+import { useDecomposeTask } from "@/hooks/useDecomposeTask";
+import { pluralizeUk } from "@/lib/pluralize";
 import { cn } from "@/lib/utils";
 import type { Task } from "@/types/task";
 
 interface TodayTaskItemProps {
   task: Task;
+  childCount: number;
   onComplete: () => void;
 }
 
-export function TodayTaskItem({ task, onComplete }: TodayTaskItemProps) {
+export function TodayTaskItem({ task, childCount, onComplete }: TodayTaskItemProps) {
   const isDone = task.status === "done";
+  const isDecomposed = childCount > 0;
+  const canDecompose = !task.parent_id && !isDecomposed && !isDone;
+  const { decompose, isDecomposing, toast } = useDecomposeTask();
 
   return (
     <div
@@ -43,6 +51,26 @@ export function TodayTaskItem({ task, onComplete }: TodayTaskItemProps) {
           {task.title}
         </p>
         <p className="mt-1 text-xs text-muted">{task.estimate_min} хв</p>
+
+        {isDecomposed && (
+          <p className="mt-1.5 text-xs text-accent">
+            Розкладено на {childCount} {pluralizeUk(childCount, "крок", "кроки", "кроків")}
+          </p>
+        )}
+
+        {canDecompose && (
+          <button
+            type="button"
+            onClick={() => decompose(task)}
+            disabled={isDecomposing}
+            className="mt-2 flex items-center gap-1.5 rounded-full border border-card-border px-3 py-1.5 text-xs font-medium text-muted hover:text-foreground disabled:opacity-70"
+          >
+            <Glow state={isDecomposing ? "thinking" : "neutral"} size="xs" />
+            {isDecomposing ? "Glow думає..." : "Розкласти з Glow"}
+          </button>
+        )}
+
+        <Toast message={toast} />
       </div>
     </div>
   );
