@@ -18,8 +18,10 @@ const ERROR_NO_CONNECTION = "Схоже, зник інтернет. Переві
 const ERROR_NO_TASKS_FOUND = "Не знайшла в цьому конкретних задач — спробуй додати більше деталей.";
 const ERROR_AUTH = "Тимчасова технічна пауза. Спробуй за хвилину";
 
-const INTRO_TEXT =
-  "Привіт, я Glow. Я допомагаю, коли в кар'єрі забагато 'треба' і незрозуміло, з чого почати. Просто напиши все, що крутиться в голові, далі - моя робота.";
+const INTRO_SUBTITLE =
+  "Привіт, я Glow. Коли в кар'єрі забагато 'треба' і незрозуміло, з чого почати - напиши все, що крутиться в голові. Далі моя робота.";
+const NORMAL_SUBTITLE =
+  "Розкажи, що зараз відбувається: плани, сумніви, хаос упереміш. Glow розкладе це на чіткі кроки.";
 
 export function BrainDumpScreen({ onParsed }: BrainDumpScreenProps) {
   const [text, setText] = useState("");
@@ -92,9 +94,7 @@ export function BrainDumpScreen({ onParsed }: BrainDumpScreenProps) {
   }
 
   const glowState = isCelebrating ? "celebrating" : isLoading ? "thinking" : "neutral";
-  const subtitle = isLoading
-    ? "Glow збирає з цього план..."
-    : "Розкажи, що зараз відбувається: плани, сумніви, хаос упереміш. Glow розкладе це на чіткі кроки і збере план на сьогодні.";
+  const subtitle = isLoading ? "Glow збирає з цього план..." : showIntro ? INTRO_SUBTITLE : NORMAL_SUBTITLE;
 
   return (
     <div className="flex flex-1 flex-col overflow-y-auto px-5 pb-6 pt-6">
@@ -105,13 +105,6 @@ export function BrainDumpScreen({ onParsed }: BrainDumpScreenProps) {
           <p className="mt-1 text-sm leading-relaxed text-muted">{subtitle}</p>
         </div>
       </header>
-
-      {showIntro && (
-        <div className="mb-4 flex items-start gap-3 rounded-2xl border border-card-border bg-card/70 p-4">
-          <Glow size="md" className="flex-shrink-0" />
-          <p className="text-sm leading-relaxed text-muted">{INTRO_TEXT}</p>
-        </div>
-      )}
 
       <textarea
         value={text}
