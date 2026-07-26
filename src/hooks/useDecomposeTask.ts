@@ -7,7 +7,7 @@ import type { Task } from "@/types/task";
 const ERROR_MESSAGE = "Ой, щось збилось. Спробуй ще раз";
 
 export function useDecomposeTask() {
-  const { addTasks } = useTasks();
+  const { tasks, addTasks } = useTasks();
   const [isDecomposing, setIsDecomposing] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
 
@@ -16,10 +16,12 @@ export function useDecomposeTask() {
     setIsDecomposing(true);
 
     try {
+      const otherTitles = tasks.filter((t) => t.id !== task.id).map((t) => t.title);
+
       const res = await fetch("/api/decompose-task", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ parentId: task.id, title: task.title }),
+        body: JSON.stringify({ parentId: task.id, title: task.title, otherTitles }),
       });
 
       if (!res.ok) throw new Error("decompose failed");
